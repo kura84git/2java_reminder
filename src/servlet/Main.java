@@ -1,11 +1,9 @@
 package servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,6 +20,7 @@ public class Main extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+		/*
 		//⓪アプリケーションスコープを定義。リマインドリストを新規作成してアプリケーションスコープに保存。
 		ServletContext application = this.getServletContext();
 		List<Remind> remindList = (List<Remind>)application.getAttribute("remindList");
@@ -29,7 +28,14 @@ public class Main extends HttpServlet {
 			remindList =  new ArrayList<>(); // Remind.javaはJavaBeans。
 			application.setAttribute("remindList", remindList);
 		}
+		*/
 
+		//データベースのリマインド情報を取得(2020/05/07[kurahashi])
+		PostRemindLogic postRemindLogic = new PostRemindLogic();
+		List<Remind> remindList = postRemindLogic.execute();
+
+		//リクエストスコープに保存(2020/05/07[kurahashi])
+		request.setAttribute("remindList", remindList);
 
 		//①main.jspへフォワード
 		String path = "/WEB-INF/jsp/main.jsp";  //(2020/04/26[mori])
@@ -50,27 +56,49 @@ public class Main extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		String remind = request.getParameter("remind");
 
+		// (2020/05/07[kurahashi])
+		String category = request.getParameter("category");
+		String target_date = request.getParameter("target_date");
+		String important_mark = request.getParameter("important_mark");
+
 		//④入力値チェックをする。値があれば、アプリケーションスコープに保存する処理を行っていく。
 		if(remind != null &&  remind.length() != 0) {
 
+			/*
 			//アプリケーションスコープを定義し、現在格納されているリマインド情報を取得。
 			ServletContext application = this.getServletContext();
 			List<Remind> remindList = (List<Remind>)application.getAttribute("remindList");
+			*/
 
 			//入力値をJavaBeansに格納
-			Remind remindLatest = new Remind(remind);
+			Remind remindLatest = new Remind(remind,category,target_date,important_mark);
 
 			//PostRemindLogicクラスのインスタンスを生成。
 			PostRemindLogic postRemindLogic = new PostRemindLogic();
+
+			/*
 			//PostRemindLogicの、送信されたリマインドをリマインドリストの先頭に追加するexecuteメソッドを呼び出す。
 			postRemindLogic.execute(remindLatest, remindList);
+			*/
 
+			postRemindLogic.create(remindLatest);
+
+			/*
 			//アプリケーションスコープに保存
 			application.setAttribute("remindList", remindList);
+			*/
 
 		}else {//例外処理の部分を追加(2020/04/26[mori])
 			request.setAttribute("errorMsg", "Please input text!");
 		}
+
+
+		//データベースのリマインド情報を取得(2020/05/07[kurahashi])
+		PostRemindLogic postRemindLogic = new PostRemindLogic();
+		List<Remind> remindList = postRemindLogic.execute();
+
+		//リクエストスコープに保存(2020/05/07[kurahashi])
+		request.setAttribute("remindList", remindList);
 
 
 		//⑤main.jspへフォワード

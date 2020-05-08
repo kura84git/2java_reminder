@@ -1,0 +1,14 @@
+create database reminder;  -- reminderデータベースの作成
+
+use reminder; -- ワークスペースをreminderデータベースに
+
+create table remind (                                        -- remindテーブル
+	user_id varchar(50) not null,                         -- ユーザID
+	remind varchar(255) not null,                       -- リマインド内容
+	category varchar(50) not null,                       -- カテゴリ
+	created_date date not null,                           -- 作成日
+	target_date date not null,                             -- 目標達成日
+	important_mark char(10) not null                          -- 重要マーク
+);
+
+insert into remind values ('1234','ハローワークへ行く','就活',current_date,'2020-05-20', '重要'); -- 仮データ挿入
